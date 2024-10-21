@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AppError } from 'src/shared/errors/app.error';
 import { PrismaService } from 'src/database/prisma.service';
-import { IUpdateShortenedUrlDTO } from './shortener.dto';
 import { ShortenedUrl } from './ShortenedUrl';
 
 @Injectable()
@@ -23,6 +22,7 @@ export class ShortenerService {
 
   async createShortUrl(sourceUrl: string, userId: number) {
     const path = this.generatePath();
+    // TODO: Verificar se o caminho já existe
 
     if (!sourceUrl) {
       throw new AppError('É necessário passar o caminho correto', 400);
@@ -58,16 +58,7 @@ export class ShortenerService {
       throw new AppError('É necessário informar o id do usuário.', 400);
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      throw new AppError('Usuário não existe!', 400);
-    }
-
+    // TODO: Verificar se consegue deixar mais performático
     const result: ShortenedUrl[] = await this.prisma.shortenedUrl.findMany({
       where: {
         userId,

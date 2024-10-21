@@ -3,8 +3,3 @@ export interface ICreateUserDTO {
   login: string;
   password: string;
 }
-
-export interface ILoginUserDTO {
-  login: string;
-  password: string;
-}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
-import { ICreateUserDTO, ILoginUserDTO } from './user.dto';
+import { ICreateUserDTO } from './user.dto';
 import { AuthService } from '../../shared/auth/auth.service';
 import { AppError } from 'src/shared/errors/app.error';
 

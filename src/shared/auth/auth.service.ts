@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { AppError } from 'src/shared/errors/app.error';
-import { ILoginUserDTO } from '../../modules/user/user.dto';
+import { ILoginUserDTO } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 
