@@ -42,10 +42,16 @@ export class ShortenerService {
     })
 
     if (!result) {
-      throw new AppError("O link passado não existe", 404)
+      throw new AppError("O caminho passado não existe", 404)
     }
 
     return result.sourceUrl;
   }
+
+  async findAllByUserId(userId: number) {}
+
+  async updateSourceUrl(id: number) {}
+
+  async deleteSourceUrl(id: number) {}
 
 }

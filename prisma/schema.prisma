@@ -8,10 +8,35 @@ generator client {
 }
 
 model UrlShortener {
-  id Int @default(autoincrement()) @id
-  sourceUrl String
-  shortnedUrlPath String @unique
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  id              Int         @id @default(autoincrement())
+  sourceUrl       String
+  shortnedUrlPath String      @unique
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  userId          Int?
+  user            User?       @relation(fields: [userId], references: [id])
+  UrlAccess       UrlAccess[]
+
+  @@map("url_shortener")
+}
+
+model UrlAccess {
+  id             Int          @id @default(autoincrement())
+  urlShortenerId Int
+  urlShortener   UrlShortener @relation(fields: [urlShortenerId], references: [id])
+  urlAccess      DateTime     @default(now())
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  login        String         @unique
+  password     String
+  name         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  UrlShortener UrlShortener[]
+
+  @@map("user")
 }
