@@ -1,10 +1,10 @@
-export class CreateUserDTO {
+export interface ICreateUserDTO {
   name: string;
   login: string;
   password: string;
 }
 
-export class LoginUserDTO {
+export interface ILoginUserDTO {
   login: string;
   password: string;
 }

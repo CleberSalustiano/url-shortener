@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
-import { CreateUserDTO, LoginUserDTO } from './user.dto';
-import { AuthService } from './auth.service';
+import { ICreateUserDTO, ILoginUserDTO } from './user.dto';
+import { AuthService } from '../../shared/auth/auth.service';
+import { AppError } from 'src/shared/errors/app.error';
 
 @Injectable()
 export class UserService {
@@ -10,8 +11,12 @@ export class UserService {
     private auth: AuthService,
   ) {}
 
-  async createUser(dto: CreateUserDTO) {
+  async createUser(dto: ICreateUserDTO) {
     const hashedPassword = await this.auth.hashPassword(dto.password);
+
+    if (!dto.name || !dto.login || !dto.password) {
+      throw new AppError('Informe os valores obrigatórios!', 400);
+    }
 
     const user = await this.prisma.user.create({
       data: {
@@ -21,33 +26,8 @@ export class UserService {
       },
     });
 
-    return user;
-  }
+    delete user.password;
 
-  async loginUser(dto: LoginUserDTO) {
-    if (!dto.login || !dto.password) {
-      throw new Error('Usuário ou senha inválidos');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: {
-        login: dto.login,
-      },
-    });
-  
-    if (!user) {
-      throw new Error('Usuário ou senha inválidos');
-    }
-  
-    const isPasswordValid = await this.auth.validatePassword(
-      dto.password,
-      user.password,
-    );
-  
-    if (!isPasswordValid) {
-      throw new Error('Usuário ou senha inválidos');
-    }
-  
     return user;
   }
 }

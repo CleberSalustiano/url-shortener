@@ -1,28 +1,44 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Post,
-  Redirect,
+  Put,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ShortenerService } from './shortener.service';
-import { CreateShortenedUrlDTO } from './shortener.dto';
+import {
+  ICreateShortenedUrlDTO,
+  IUpdateShortenedUrlDTO,
+} from './shortener.dto';
 import { Request, Response } from 'express';
-import { AppError } from 'src/app.error';
+import { AuthGuard } from 'src/shared/auth/auth.guard';
+import { AuthService } from 'src/shared/auth/auth.service';
 
 @Controller()
 export class ShortenerController {
-  constructor(private readonly shortenerService: ShortenerService) {}
+  constructor(
+    private readonly shortenerService: ShortenerService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('shorten')
   async shortenUrl(
     @Req() request: Request,
-    @Body() { sourceUrl }: CreateShortenedUrlDTO,
+    @Body() { sourceUrl }: ICreateShortenedUrlDTO,
   ) {
-    const path = await this.shortenerService.shortenUrl(sourceUrl);
+    let userId: number;
+    if (request.headers.authorization) {
+      const [, token] = request.headers.authorization.split(' ');
+      const payload = await this.authService.validateToken(token);
+      userId = payload.id;
+    }
+    const path = await this.shortenerService.createShortUrl(sourceUrl, userId);
     return `${request.protocol}://${request.get('host')}/${path}`;
   }
 
@@ -31,13 +47,38 @@ export class ShortenerController {
     @Res() response: Response,
     @Param('shortnedUrlPath') shortnedUrlPath: string,
   ) {
-    // TODO: Melhorar essa ideia de validação
-    try {
-      const url = await this.shortenerService.findSourceUrl(shortnedUrlPath);
-      // TODO: contabilizar a visitia desse url
-      return response.redirect(url);
-    } catch (error: AppError | any) {
-      return response.status(error?.statusCode).send(error.message);
-    }
+    const url = await this.shortenerService.findSourceUrl(shortnedUrlPath);
+    this.shortenerService.urlAccessRecord(url.id);
+    return response.redirect(url.sourceUrl);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('shortened/urls')
+  async getAllUrls(@Req() request) {
+    const userId = request.user.id;
+    const urls = await this.shortenerService.findAllByUserId(userId);
+    return urls;
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('shortened/url/:id')
+  async updateSourceUrl(
+    @Req() request,
+    @Body() { sourceUrl }: IUpdateShortenedUrlDTO,
+    @Param('id') id: string,
+  ) {
+    const urlShortenedId = Number(id);
+    return await this.shortenerService.updateSourceUrl(
+      sourceUrl,
+      urlShortenedId,
+    );
+  }
+
+  @HttpCode(204)
+  @UseGuards(AuthGuard)
+  @Delete('shortened/url/:id')
+  async deleteSourceUrl(@Req() request, @Param('id') id: string) {
+    const shortnedUrlId = Number(id);
+    return await this.shortenerService.deleteSourceUrl(shortnedUrlId);
   }
 }

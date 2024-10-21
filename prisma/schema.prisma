@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model UrlShortener {
+model ShortenedUrl {
   id              Int         @id @default(autoincrement())
   sourceUrl       String
   shortnedUrlPath String      @unique
@@ -18,14 +18,16 @@ model UrlShortener {
   user            User?       @relation(fields: [userId], references: [id])
   UrlAccess       UrlAccess[]
 
-  @@map("url_shortener")
+  @@map("shortened_url")
 }
 
 model UrlAccess {
   id             Int          @id @default(autoincrement())
-  urlShortenerId Int
-  urlShortener   UrlShortener @relation(fields: [urlShortenerId], references: [id])
+  shortenedUrlId Int
+  shortenedUrl   ShortenedUrl @relation(fields: [shortenedUrlId], references: [id])
   urlAccess      DateTime     @default(now())
+
+  @@map("url_access")
 }
 
 model User {
@@ -36,7 +38,7 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
-  UrlShortener UrlShortener[]
+  ShortnedUrl ShortenedUrl[]
 
   @@map("user")
 }

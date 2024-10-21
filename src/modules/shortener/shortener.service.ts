@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { AppError } from 'src/app.error';
+import { AppError } from 'src/shared/errors/app.error';
 import { PrismaService } from 'src/database/prisma.service';
+import { IUpdateShortenedUrlDTO } from './shortener.dto';
+import { ShortenedUrl } from './ShortenedUrl';
 
 @Injectable()
 export class ShortenerService {
@@ -19,39 +21,122 @@ export class ShortenerService {
     return result;
   }
 
-  async shortenUrl(sourceUrl: string) {
+  async createShortUrl(sourceUrl: string, userId: number) {
     const path = this.generatePath();
 
-    // TODO: Tratar "sourceUrl" vazia
+    if (!sourceUrl) {
+      throw new AppError('É necessário passar o caminho correto', 400);
+    }
 
-    await this.prisma.urlShortener.create({
+    await this.prisma.shortenedUrl.create({
       data: {
         sourceUrl,
-        shortnedUrlPath: path
-      }
+        shortnedUrlPath: path,
+        userId,
+      },
     });
-    
+
     return path;
   }
 
   async findSourceUrl(shortnedUrlPath: string) {
-    const result = await this.prisma.urlShortener.findFirst({
+    const result: ShortenedUrl = await this.prisma.shortenedUrl.findFirst({
       where: {
-        shortnedUrlPath
-      }
-    })
+        shortnedUrlPath,
+      },
+    });
 
     if (!result) {
-      throw new AppError("O caminho passado não existe", 404)
+      throw new AppError('O caminho passado não existe', 404);
     }
 
-    return result.sourceUrl;
+    return result;
   }
 
-  async findAllByUserId(userId: number) {}
+  async findAllByUserId(userId: number) {
+    if (!userId) {
+      throw new AppError('É necessário informar o id do usuário.', 400);
+    }
 
-  async updateSourceUrl(id: number) {}
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
-  async deleteSourceUrl(id: number) {}
+    if (!user) {
+      throw new AppError('Usuário não existe!', 400);
+    }
 
+    const result: ShortenedUrl[] = await this.prisma.shortenedUrl.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+    });
+
+    for (let i = 0; i < result.length; i++) {
+      const url = result[i];
+      const count = await this.prisma.urlAccess.count({
+        where: {
+          shortenedUrlId: url.id,
+        },
+      });
+      url.count = count;
+    }
+
+    return result;
+  }
+
+  async updateSourceUrl(sourceUrl: string, id: number) {
+    if (!id) {
+      throw new AppError('É necessário informar o id.', 400);
+    }
+
+    if (!sourceUrl) {
+      throw new AppError('É necessário informar o caminho correto.', 400);
+    }
+
+    const result: ShortenedUrl = await this.prisma.shortenedUrl.update({
+      where: {
+        id: id,
+      },
+      data: {
+        sourceUrl: sourceUrl,
+      },
+    });
+
+    return result;
+  }
+
+  async deleteSourceUrl(id: number) {
+    if (!id) {
+      throw new AppError('É necessário informar o id.', 400);
+    }
+
+    await this.prisma.shortenedUrl.update({
+      where: {
+        id: id,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return 'Url deletada com sucesso!';
+  }
+
+  async urlAccessRecord(shortenedUrlId: number) {
+    if (!shortenedUrlId) {
+      throw new AppError('É necessário informar o id.', 400);
+    }
+
+    const urlAccess = await this.prisma.urlAccess.create({
+      data: {
+        shortenedUrlId: shortenedUrlId,
+      },
+    });
+
+    return urlAccess;
+  }
 }
