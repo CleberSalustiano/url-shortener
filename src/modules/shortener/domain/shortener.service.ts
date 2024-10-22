@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AppError } from 'src/shared/errors/domain/app.error';
-import ShortenedUrl from './shortenedUrl';
-import IShortenedUrlRepository from './shortenedUrl.repository.interface';
+import { AppError } from '../../../shared/errors/domain/app.error';
+import ShortenedUrl from './shortened-url.entity';
+import IShortenedUrlRepository from './shortened-url.repository.interface';
 
 @Injectable()
 export class ShortenerService {

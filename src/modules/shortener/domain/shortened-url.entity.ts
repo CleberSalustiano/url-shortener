@@ -5,6 +5,6 @@ export default class ShortenedUrl {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
-  userId: number;
+  userId?: number;
   count?: number;
 }

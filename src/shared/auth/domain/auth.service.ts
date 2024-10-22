@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { AppError } from 'src/shared/errors/domain/app.error';
+import { AppError } from '../../../shared/errors/domain/app.error';
 import { ILoginUserDTO } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import IUserRepository from 'src/modules/user/domain/user.repository.interface';
+import IUserRepository from '../../../modules/user/domain/user.repository.interface';
 
 @Injectable()
 export class AuthService {

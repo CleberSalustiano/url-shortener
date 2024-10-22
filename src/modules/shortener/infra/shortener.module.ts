@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ShortenerService } from '../domain/shortener.service';
 import { ShortenerController } from './shortener.controller';
-import { PrismaService } from 'src/database/prisma.service';
-import { AuthService } from 'src/shared/auth/domain/auth.service';
-import ShortenedUrlRepository from './shortenedUrl.repository';
-import { AuthModule } from 'src/shared/auth/infra/auth.module';
+import { PrismaService } from '../../../database/prisma.service';
+import { AuthService } from '../../../shared/auth/domain/auth.service';
+import ShortenedUrlRepository from './shortened-url.repository';
+import { AuthModule } from '../../../shared/auth/infra/auth.module';
 
 @Module({
   imports:[AuthModule],

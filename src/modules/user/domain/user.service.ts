@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ICreateUserDTO } from './user.dto';
 import { AuthService } from '../../../shared/auth/domain/auth.service';
-import { AppError } from 'src/shared/errors/domain/app.error';
+import { AppError } from '../../../shared/errors/domain/app.error';
 import IUserRepository from './user.repository.interface';
 
 @Injectable()

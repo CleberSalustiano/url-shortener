@@ -17,8 +17,8 @@ import {
   IUpdateShortenedUrlDTO,
 } from '../domain/shortener.dto';
 import { Request, Response } from 'express';
-import { AuthGuard } from 'src/shared/auth/infra/auth.guard';
-import { AuthService } from 'src/shared/auth/domain/auth.service';
+import { AuthGuard } from '../../../shared/auth/infra/auth.guard';
+import { AuthService } from '../../../shared/auth/domain/auth.service';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('ShortenedUrl')

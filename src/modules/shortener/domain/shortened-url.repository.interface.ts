@@ -1,5 +1,5 @@
-import ShortenedUrl from "./shortenedUrl"
-import UrlAccess from "./urlAccess";
+import ShortenedUrl from "./shortened-url.entity"
+import UrlAccess from "./url-access.entity";
 
 export default interface IShortenedUrlRepository {
   findByShortenedUrlPath(shortenedUrlPath: string) : Promise<ShortenedUrl>;

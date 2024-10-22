@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import IShortenedUrlRepository from '../domain/shortenedUrl.repository.interface';
-import ShortenedUrl from '../domain/shortenedUrl';
-import { PrismaService } from 'src/database/prisma.service';
-import UrlAccess from '../domain/urlAccess';
+import IShortenedUrlRepository from '../domain/shortened-url.repository.interface';
+import ShortenedUrl from '../domain/shortened-url.entity';
+import { PrismaService } from '../../../database/prisma.service';
+import UrlAccess from '../domain/url-access.entity';
 
 @Injectable()
 export default class ShortenedUrlRepository implements IShortenedUrlRepository {

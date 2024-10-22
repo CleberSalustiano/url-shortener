@@ -1,6 +1,6 @@
-import { PrismaService } from "src/database/prisma.service";
+import { PrismaService } from "../../../database/prisma.service";
 import IUserRepository from "../domain/user.repository.interface";
-import User from "../domain/user";
+import User from "../domain/user.entity";
 import { ICreateUserDTO } from "../domain/user.dto";
 import { Injectable } from "@nestjs/common";
 
