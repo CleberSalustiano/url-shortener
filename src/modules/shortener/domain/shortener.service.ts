@@ -24,8 +24,17 @@ export class ShortenerService {
   }
 
   async createShortUrl(sourceUrl: string, userId: number) {
-    const path = this.generatePath();
-    // TODO: Verificar se o caminho já existe
+    let alreadyExistPath = true;
+    let path : string;
+    
+    do {
+      path = this.generatePath();
+      const existShortenedUrl =
+        await this.shortenedUrlRepository.findByShortenedUrlPath(path);
+
+      if (!existShortenedUrl) alreadyExistPath = false
+
+    } while (alreadyExistPath);
 
     if (!sourceUrl) {
       throw new AppError('É necessário passar o caminho correto', 400);
