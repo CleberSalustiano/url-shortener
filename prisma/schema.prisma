@@ -10,7 +10,7 @@ generator client {
 model ShortenedUrl {
   id              Int         @id @default(autoincrement())
   sourceUrl       String
-  shortnedUrlPath String      @unique
+  shortenedUrlPath String      @unique
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   deletedAt       DateTime?

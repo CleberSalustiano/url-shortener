@@ -11,14 +11,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ShortenerService } from './shortener.service';
+import { ShortenerService } from '../domain/shortener.service';
 import {
   ICreateShortenedUrlDTO,
   IUpdateShortenedUrlDTO,
-} from './shortener.dto';
+} from '../domain/shortener.dto';
 import { Request, Response } from 'express';
-import { AuthGuard } from 'src/shared/auth/auth.guard';
-import { AuthService } from 'src/shared/auth/auth.service';
+import { AuthGuard } from 'src/shared/auth/infra/auth.guard';
+import { AuthService } from 'src/shared/auth/domain/auth.service';
 
 @Controller()
 export class ShortenerController {

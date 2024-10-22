@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from '../domain/auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaService } from 'src/database/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { UserModule } from 'src/modules/user/infra/user.module';
+import UserRepository from 'src/modules/user/infra/user.repository';
 
 @Module({
   imports: [
     PassportModule,
+    UserModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET_KEY ?? '',
@@ -15,6 +18,11 @@ import { PassportModule } from '@nestjs/passport';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService],
+  providers: [
+    AuthService,
+    PrismaService,
+    { provide: 'IUserRepository', useClass: UserRepository },
+  ],
+  exports: ["IUserRepository"]
 })
 export class AuthModule {}

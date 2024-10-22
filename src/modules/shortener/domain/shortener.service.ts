@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { AppError } from 'src/shared/errors/app.error';
-import { PrismaService } from 'src/database/prisma.service';
-import { ShortenedUrl } from './ShortenedUrl';
+import { Inject, Injectable } from '@nestjs/common';
+import { AppError } from 'src/shared/errors/domain/app.error';
+import ShortenedUrl from './shortenedUrl';
+import IShortenedUrlRepository from './shortenedUrl.repository.interface';
 
 @Injectable()
 export class ShortenerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('IShortenedUrlRepository')
+    private shortenedUrlRepository: IShortenedUrlRepository,
+  ) {}
 
   private generatePath() {
     const characters =
@@ -28,23 +31,20 @@ export class ShortenerService {
       throw new AppError('É necessário passar o caminho correto', 400);
     }
 
-    await this.prisma.shortenedUrl.create({
-      data: {
-        sourceUrl,
-        shortnedUrlPath: path,
-        userId,
-      },
+    await this.shortenedUrlRepository.create({
+      sourceUrl,
+      shortenedUrlPath: path,
+      userId,
     });
 
     return path;
   }
 
-  async findSourceUrl(shortnedUrlPath: string) {
-    const result: ShortenedUrl = await this.prisma.shortenedUrl.findFirst({
-      where: {
-        shortnedUrlPath,
-      },
-    });
+  async findSourceUrl(shortenedUrlPath: string) {
+    const result =
+      await this.shortenedUrlRepository.findByShortenedUrlPath(
+        shortenedUrlPath,
+      );
 
     if (!result) {
       throw new AppError('O caminho passado não existe', 404);
@@ -58,23 +58,8 @@ export class ShortenerService {
       throw new AppError('É necessário informar o id do usuário.', 400);
     }
 
-    // TODO: Verificar se consegue deixar mais performático
-    const result: ShortenedUrl[] = await this.prisma.shortenedUrl.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-    });
-
-    for (let i = 0; i < result.length; i++) {
-      const url = result[i];
-      const count = await this.prisma.urlAccess.count({
-        where: {
-          shortenedUrlId: url.id,
-        },
-      });
-      url.count = count;
-    }
+    const result: ShortenedUrl[] =
+      await this.shortenedUrlRepository.findAllByUserId(userId);
 
     return result;
   }
@@ -88,13 +73,9 @@ export class ShortenerService {
       throw new AppError('É necessário informar o caminho correto.', 400);
     }
 
-    const result: ShortenedUrl = await this.prisma.shortenedUrl.update({
-      where: {
-        id: id,
-      },
-      data: {
-        sourceUrl: sourceUrl,
-      },
+    const result: ShortenedUrl = await this.shortenedUrlRepository.update({
+      id,
+      sourceUrl,
     });
 
     return result;
@@ -105,14 +86,7 @@ export class ShortenerService {
       throw new AppError('É necessário informar o id.', 400);
     }
 
-    await this.prisma.shortenedUrl.update({
-      where: {
-        id: id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
+    await this.shortenedUrlRepository.delete(id);
 
     return 'Url deletada com sucesso!';
   }
@@ -122,11 +96,8 @@ export class ShortenerService {
       throw new AppError('É necessário informar o id.', 400);
     }
 
-    const urlAccess = await this.prisma.urlAccess.create({
-      data: {
-        shortenedUrlId: shortenedUrlId,
-      },
-    });
+    const urlAccess =
+      await this.shortenedUrlRepository.urlAccessRecord(shortenedUrlId);
 
     return urlAccess;
   }

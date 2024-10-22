@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './app.service';
-import { ShortenerModule } from './modules/shortener/shortener.module';
-import { UserModule } from './modules/user/user.module';
-import { AuthModule } from './shared/auth/auth.module';
+import { ShortenerModule } from './modules/shortener/infra/shortener.module';
+import { UserModule } from './modules/user/infra/user.module';
+import { AuthModule } from './shared/auth/infra/auth.module';
 
 @Module({
   imports: [ShortenerModule, UserModule, AuthModule],
   controllers: [],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}

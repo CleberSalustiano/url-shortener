@@ -1,23 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { AppError } from 'src/shared/errors/app.error';
+import { AppError } from 'src/shared/errors/domain/app.error';
 import { ILoginUserDTO } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/database/prisma.service';
+import IUserRepository from 'src/modules/user/domain/user.repository.interface';
 
 @Injectable()
 export class AuthService {
-  private readonly secretKey = Buffer.from(process.env.PASSWORD_SECRET_KEY ?? '');
-
   constructor(
-    private prisma: PrismaService,
+    @Inject("IUserRepository")
+    private userRepository: IUserRepository,
     private jwtService: JwtService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {
     try {
       const hashedPassword = await argon2.hash(password, {
-        secret: this.secretKey,
+        secret: Buffer.from(process.env.PASSWORD_SECRET_KEY ?? ''),
         type: argon2.argon2id,
       });
       return hashedPassword;
@@ -32,7 +31,7 @@ export class AuthService {
   ): Promise<boolean> {
     try {
       return await argon2.verify(hashedPassword, password, {
-        secret: this.secretKey,
+        secret: Buffer.from(process.env.PASSWORD_SECRET_KEY ?? ''),
       });
     } catch (error) {
       throw new AppError('Erro ao validar a senha', 500);
@@ -44,11 +43,7 @@ export class AuthService {
       throw new AppError('Usuário ou senha inválidos', 400);
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        login: dto.login,
-      },
-    });
+    const user = await this.userRepository.findByLogin(dto.login)
 
     if (!user) {
       throw new AppError('Usuário ou senha inválidos', 400);
@@ -72,17 +67,13 @@ export class AuthService {
 
   async validateToken(token: string) {
     try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: process.env.JWT_SECRET_KEY ?? '',
-        }
-      );
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_KEY ?? '',
+      });
 
       return payload;
     } catch {
-      throw new AppError("Token inválido", 401);
+      throw new AppError('Token inválido', 401);
     }
   }
-
 }
