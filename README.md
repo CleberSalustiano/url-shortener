@@ -47,8 +47,14 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 
-# If do you modify some database structure use
+# If you modify some database structure use
 $ npx prisma migrate dev
+
+# If you want run unit-tests use
+$ npm run test 
+
+# Or unit-tests on watch
+$ npm run test:watch
 ```
 
 ## See documentation on Swagger
